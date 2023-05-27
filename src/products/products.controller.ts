@@ -9,16 +9,20 @@ import {
   ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
+import { PaginationDto } from 'src/common';
+
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PaginationDto } from 'src/common';
+import { Auth } from '../auth/decorators';
+import { ValidRoles } from '../auth/interfaces';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
+  @Auth() // tiene que estar autenticado para crear un producto
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
@@ -34,6 +38,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @Auth(ValidRoles.admin) // tiene que estar autenticado y ser admin para actualizar un producto
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -42,6 +47,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @Auth(ValidRoles.superUser) // // tiene que estar autenticado y ser super admin para eliminar un producto
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.remove(id);
   }
